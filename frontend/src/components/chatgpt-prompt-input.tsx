@@ -2,6 +2,8 @@ import * as React from "react"
 import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
+import api from "../api/base"
+import { Spinner } from "./ui/spinner"
 
 type ClassValue = string | number | boolean | null | undefined
 function cn(...inputs: ClassValue[]): string {
@@ -216,9 +218,23 @@ export const PromptBox = React.forwardRef<
   HTMLTextAreaElement,
   React.TextareaHTMLAttributes<HTMLTextAreaElement>
 >(({ className, ...props }, ref) => {
-  // ... all state and handlers are unchanged ...
-  const internalTextareaRef = React.useRef<HTMLTextAreaElement>(null)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [response, setResponse] = React.useState<string | null>(null)
+  const [error, setError] = React.useState<string | null>(null)
   const [value, setValue] = React.useState("")
+  const handleSubmit = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await api.post("/predict", { text: value })
+      setResponse(response.data.Label)
+    } catch (error) {
+      setError(error as string)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  const internalTextareaRef = React.useRef<HTMLTextAreaElement>(null)
   const [selectedTool, setSelectedTool] = React.useState<string | null>(null)
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false)
   React.useImperativeHandle(ref, () => internalTextareaRef.current!, [])
@@ -319,6 +335,7 @@ export const PromptBox = React.forwardRef<
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
+                    onClick={() => handleSubmit()}
                     type="submit"
                     disabled={!hasValue}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-black text-sm font-medium text-white transition-colors hover:bg-black/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:bg-black/40 dark:bg-white dark:text-black dark:hover:bg-white/80 dark:disabled:bg-[#515151]"
@@ -335,6 +352,11 @@ export const PromptBox = React.forwardRef<
           </div>
         </TooltipProvider>
       </div>
+      {isLoading && <Spinner className="mx-auto" />}
+      {error && <div className="text-center text-sm text-red-500">{error}</div>}
+      {response && (
+        <div className="text-center text-sm text-foreground">{response}</div>
+      )}
     </div>
   )
 })

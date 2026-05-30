@@ -12,7 +12,7 @@ label_encoder = joblib.load("ai_models/LabelEncoder.pkl")
 app = FastAPI(title="Sentiment Analysis", version="1.0.0")
 
 
-origins = [settings.FRONTEND_URL]
+origins = [str(settings.FRONTEND_URL)]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
