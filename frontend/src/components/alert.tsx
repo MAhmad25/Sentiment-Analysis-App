@@ -1,7 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 import { cva, type VariantProps } from "class-variance-authority"
-import { X } from "lucide-react"
 
 const alertVariants = cva(
   "flex w-full items-stretch gap-2 group-[.toaster]:w-(--width)",
@@ -274,11 +273,7 @@ function AlertTitle({
   ...props
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <div
-      data-slot="alert-title"
-      className={cn("grow", className)}
-      {...props}
-    />
+    <div data-slot="alert-title" className={cn("grow", className)} {...props} />
   )
 }
 
@@ -323,7 +318,7 @@ function AlertContent({
     <div
       data-slot="alert-content"
       className={cn(
-        "space-y-2 [&_[data-slot=alert-title]]:font-semibold",
+        "space-y-2 **:data-[slot=alert-title]:font-semibold",
         className
       )}
       {...props}
