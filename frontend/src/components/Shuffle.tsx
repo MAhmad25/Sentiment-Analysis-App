@@ -3,24 +3,25 @@ import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { SplitText as GSAPSplitText } from "gsap/SplitText"
 import { useGSAP } from "@gsap/react"
+import { JSX } from "react"
 
-gsap.registerPlugin(ScrollTrigger, GSAPSplitText, useGSAP)
+gsap.registerPlugin(ScrollTrigger, GSAPSplitText)
 
-type ShuffleProps = {
-  text?: React.ReactNode
+export interface ShuffleProps {
+  text: string
   className?: string
   style?: React.CSSProperties
-  shuffleDirection?: "right" | "left" | "up" | "down"
+  shuffleDirection?: "left" | "right" | "up" | "down"
   duration?: number
   maxDelay?: number
-  ease?: string
+  ease?: string | ((t: number) => number)
   threshold?: number
   rootMargin?: string
-  tag?: string
+  tag?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "p" | "span"
   textAlign?: React.CSSProperties["textAlign"]
   onShuffleComplete?: () => void
   shuffleTimes?: number
-  animationMode?: "evenodd" | string
+  animationMode?: "random" | "evenodd"
   loop?: boolean
   loopDelay?: number
   stagger?: number
@@ -37,7 +38,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
   className = "",
   style = {},
   shuffleDirection = "right",
-  duration = 1,
+  duration = 0.35,
   maxDelay = 0,
   ease = "power3.out",
   threshold = 0.1,
@@ -47,8 +48,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
   onShuffleComplete,
   shuffleTimes = 1,
   animationMode = "evenodd",
-  loop = true,
-  loopDelay = 5,
+  loop = false,
+  loopDelay = 0,
   stagger = 0.03,
   scrambleCharset = "",
   colorFrom,
@@ -57,22 +58,22 @@ const Shuffle: React.FC<ShuffleProps> = ({
   respectReducedMotion = true,
   triggerOnHover = true,
 }) => {
-  const ref = useRef<HTMLElement | null>(null)
+  const ref = useRef<HTMLElement>(null)
   const [fontsLoaded, setFontsLoaded] = useState(false)
   const [ready, setReady] = useState(false)
 
-  const splitRef = useRef<any | null>(null)
-  const wrappersRef = useRef<HTMLSpanElement[]>([])
-  const tlRef = useRef<any | null>(null)
-  const playingRef = useRef<boolean>(false)
-  const hoverHandlerRef = useRef<(() => void) | null>(null)
+  const splitRef = useRef<GSAPSplitText | null>(null)
+  const wrappersRef = useRef<HTMLElement[]>([])
+  const tlRef = useRef<gsap.core.Timeline | null>(null)
+  const playingRef = useRef(false)
+  const hoverHandlerRef = useRef<((e: Event) => void) | null>(null)
 
-  const userHasFont = useMemo(
-    () =>
-      (style && (style as any).fontFamily) ||
-      (className && /font[-[]/i.test(className)),
-    [style, className]
-  )
+  useEffect(() => {
+    if ("fonts" in document) {
+      if (document.fonts.status === "loaded") setFontsLoaded(true)
+      else document.fonts.ready.then(() => setFontsLoaded(true))
+    } else setFontsLoaded(true)
+  }, [])
 
   const scrollTriggerStart = useMemo(() => {
     const startPct = (1 - threshold) * 100
@@ -84,17 +85,9 @@ const Shuffle: React.FC<ShuffleProps> = ({
     return `top ${startPct}%${sign}`
   }, [threshold, rootMargin])
 
-  useEffect(() => {
-    if ("fonts" in document) {
-      if (document.fonts.status === "loaded") setFontsLoaded(true)
-      else document.fonts.ready.then(() => setFontsLoaded(true))
-    } else setFontsLoaded(true)
-  }, [])
-
   useGSAP(
     () => {
       if (!ref.current || !text || !fontsLoaded) return
-
       if (
         respectReducedMotion &&
         window.matchMedia &&
@@ -104,15 +97,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
         return
       }
 
-      const el = ref.current
-
-      let computedFont = ""
-      if (userHasFont) {
-        computedFont = style.fontFamily || getComputedStyle(el).fontFamily || ""
-      } else {
-        computedFont = `Roboto`
-      }
-
+      const el = ref.current as HTMLElement
       const start = scrollTriggerStart
 
       const removeHover = () => {
@@ -129,8 +114,10 @@ const Shuffle: React.FC<ShuffleProps> = ({
         }
         if (wrappersRef.current.length) {
           wrappersRef.current.forEach((wrap) => {
-            const inner = wrap.firstElementChild
-            const orig = inner?.querySelector('[data-orig="1"]')
+            const inner = wrap.firstElementChild as HTMLElement | null
+            const orig = inner?.querySelector(
+              '[data-orig="1"]'
+            ) as HTMLElement | null
             if (orig && wrap.parentNode)
               wrap.parentNode.replaceChild(orig, wrap)
           })
@@ -138,15 +125,15 @@ const Shuffle: React.FC<ShuffleProps> = ({
         }
         try {
           splitRef.current?.revert()
-        } catch {
-          /* noop */
-        }
+        } catch {}
         splitRef.current = null
         playingRef.current = false
       }
 
       const build = () => {
         teardown()
+
+        const computedFont = getComputedStyle(el).fontFamily
 
         splitRef.current = new GSAPSplitText(el, {
           type: "chars",
@@ -157,7 +144,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
           reduceWhiteSpace: false,
         })
 
-        const chars: HTMLElement[] = splitRef.current.chars || []
+        const chars = (splitRef.current.chars || []) as HTMLElement[]
         wrappersRef.current = []
 
         const rolls = Math.max(1, Math.floor(shuffleTimes))
@@ -172,7 +159,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
           const h = ch.getBoundingClientRect().height
           if (!w) return
 
-          const wrap = document.createElement("span") as HTMLSpanElement
+          const wrap = document.createElement("span")
           wrap.className = "inline-block overflow-hidden text-left"
           Object.assign(wrap.style, {
             width: w + "px",
@@ -183,7 +170,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
             verticalAlign: "bottom",
           })
 
-          const inner = document.createElement("span") as HTMLSpanElement
+          const inner = document.createElement("span")
           inner.className =
             "inline-block will-change-transform origin-left transform-gpu " +
             (shuffleDirection === "up" || shuffleDirection === "down"
@@ -232,8 +219,8 @@ const Shuffle: React.FC<ShuffleProps> = ({
           const steps = rolls + 1
 
           if (shuffleDirection === "right" || shuffleDirection === "down") {
-            const firstCopy = inner.firstElementChild
-            const real = inner.lastElementChild
+            const firstCopy = inner.firstElementChild as HTMLElement | null
+            const real = inner.lastElementChild as HTMLElement | null
             if (real) inner.insertBefore(real, inner.firstChild)
             if (firstCopy) inner.appendChild(firstCopy)
           }
@@ -267,20 +254,18 @@ const Shuffle: React.FC<ShuffleProps> = ({
             inner.setAttribute("data-final-y", String(finalY))
           }
 
-          if (colorFrom) inner.style.color = colorFrom
+          if (colorFrom) (inner.style as any).color = colorFrom
           wrappersRef.current.push(wrap)
         })
       }
 
-      const inners = (): HTMLElement[] =>
-        wrappersRef.current
-          .map((w) => w.firstElementChild as HTMLElement | null)
-          .filter(Boolean) as HTMLElement[]
+      const inners = () =>
+        wrappersRef.current.map((w) => w.firstElementChild as HTMLElement)
 
       const randomizeScrambles = () => {
         if (!scrambleCharset) return
         wrappersRef.current.forEach((w) => {
-          const strip = w.firstElementChild as HTMLElement | null
+          const strip = w.firstElementChild as HTMLElement
           if (!strip) return
           const kids = Array.from(strip.children) as HTMLElement[]
           for (let i = 1; i < kids.length - 1; i++) {
@@ -293,7 +278,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
 
       const cleanupToStill = () => {
         wrappersRef.current.forEach((w) => {
-          const strip = w.firstElementChild as HTMLElement | null
+          const strip = w.firstElementChild as HTMLElement
           if (!strip) return
           const real = strip.querySelector(
             '[data-orig="1"]'
@@ -321,17 +306,13 @@ const Shuffle: React.FC<ShuffleProps> = ({
             if (scrambleCharset) randomizeScrambles()
             if (isVertical) {
               gsap.set(strips, {
-                y: (...args: any[]) =>
-                  parseFloat(
-                    (args[1] as HTMLElement).getAttribute("data-start-y") || "0"
-                  ),
+                y: (i, t: HTMLElement) =>
+                  parseFloat(t.getAttribute("data-start-y") || "0"),
               })
             } else {
               gsap.set(strips, {
-                x: (...args: any[]) =>
-                  parseFloat(
-                    (args[1] as HTMLElement).getAttribute("data-start-x") || "0"
-                  ),
+                x: (i, t: HTMLElement) =>
+                  parseFloat(t.getAttribute("data-start-x") || "0"),
               })
             }
             onShuffleComplete?.()
@@ -347,7 +328,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
           },
         })
 
-        const addTween = (targets: HTMLElement[] | HTMLElement, at: number) => {
+        const addTween = (targets: HTMLElement[], at: number) => {
           const vars: any = {
             duration,
             ease,
@@ -355,21 +336,17 @@ const Shuffle: React.FC<ShuffleProps> = ({
             stagger: animationMode === "evenodd" ? stagger : 0,
           }
           if (isVertical) {
-            vars.y = (...args: any[]) =>
-              parseFloat(
-                (args[0] as HTMLElement).getAttribute("data-final-y") || "0"
-              )
+            vars.y = (i: number, t: HTMLElement) =>
+              parseFloat(t.getAttribute("data-final-y") || "0")
           } else {
-            vars.x = (...args: any[]) =>
-              parseFloat(
-                (args[0] as HTMLElement).getAttribute("data-final-x") || "0"
-              )
+            vars.x = (i: number, t: HTMLElement) =>
+              parseFloat(t.getAttribute("data-final-x") || "0")
           }
 
-          tl.to(targets as any, vars, at)
+          tl.to(targets, vars, at)
 
           if (colorFrom && colorTo)
-            tl.to(targets as any, { color: colorTo, duration, ease }, at)
+            tl.to(targets, { color: colorTo, duration, ease }, at)
         }
 
         if (animationMode === "evenodd") {
@@ -392,10 +369,10 @@ const Shuffle: React.FC<ShuffleProps> = ({
             } else {
               vars.x = parseFloat(strip.getAttribute("data-final-x") || "0")
             }
-            tl.to(strip as any, vars, d)
+            tl.to(strip, vars, d)
             if (colorFrom && colorTo)
               tl.fromTo(
-                strip as any,
+                strip,
                 { color: colorFrom },
                 { color: colorTo, duration, ease },
                 d
@@ -462,27 +439,41 @@ const Shuffle: React.FC<ShuffleProps> = ({
         respectReducedMotion,
         triggerOnHover,
         onShuffleComplete,
-        userHasFont,
       ],
       scope: ref,
     }
   )
 
   const baseTw =
-    "inline-block whitespace-normal break-words will-change-transform uppercase text-[4rem] leading-none"
+    "inline-block whitespace-normal break-words will-change-transform uppercase text-2xl leading-none"
+  const userHasFont = useMemo(
+    () => className && /font[-[]/i.test(className),
+    [className]
+  )
+
+  const fallbackFont = useMemo(
+    () => (userHasFont ? {} : { fontFamily: `'Press Start 2P', sans-serif` }),
+    [userHasFont]
+  )
+
+  const commonStyle = useMemo(
+    () => ({
+      textAlign,
+      ...fallbackFont,
+      ...style,
+    }),
+    [textAlign, fallbackFont, style]
+  )
+
   const classes = useMemo(
     () => `${baseTw} ${ready ? "visible" : "invisible"} ${className}`.trim(),
     [baseTw, ready, className]
   )
-  const Tag = tag || "p"
-  const commonStyle = useMemo(
-    () => ({ textAlign, ...style }),
-    [textAlign, style]
-  )
+  const Tag = (tag || "p") as keyof JSX.IntrinsicElements
 
   return React.createElement(
     Tag,
-    { ref: ref, className: classes, style: commonStyle },
+    { ref: ref as any, className: classes, style: commonStyle },
     text
   )
 }

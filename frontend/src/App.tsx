@@ -15,14 +15,20 @@ export function App() {
       />
       <div className="absolute flex w-full max-w-xl flex-col gap-10">
         <Shuffle
-          className="text-xl dark:text-[#271814]"
-          style={{ fontFamily: "Roboto" }}
-          text={"Check Sentiment"}
-          onShuffleComplete={undefined}
-          colorFrom={undefined}
-          colorTo={undefined}
+          text="Check Sentiment"
+          shuffleDirection="right"
+          duration={1}
+          animationMode="evenodd"
+          shuffleTimes={2}
+          ease="power3.out"
+          stagger={0.04}
+          threshold={0.1}
+          triggerOnce={true}
+          triggerOnHover
+          respectReducedMotion={true}
+          loop={true}
+          loopDelay={5}
         />
-
         <PromptBox />
       </div>
     </div>
