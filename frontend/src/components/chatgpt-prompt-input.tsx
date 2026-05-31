@@ -4,6 +4,7 @@ import * as PopoverPrimitive from "@radix-ui/react-popover"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import api from "../api/base"
 import { Spinner } from "./ui/spinner"
+import { Alert, AlertTitle } from "../components/alert"
 
 type ClassValue = string | number | boolean | null | undefined
 function cn(...inputs: ClassValue[]): string {
@@ -258,106 +259,151 @@ export const PromptBox = React.forwardRef<
   const ActiveToolIcon = activeTool?.icon
 
   return (
-    <div
-      className={cn(
-        "flex cursor-text flex-col rounded-[28px] border bg-white p-2 shadow-sm transition-colors dark:border-transparent dark:bg-[#303030]",
-        className
-      )}
-    >
-      <textarea
-        ref={internalTextareaRef}
-        rows={1}
-        value={value}
-        onChange={handleInputChange}
-        placeholder="Message..."
-        className="custom-scrollbar min-h-12 w-full resize-none border-0 bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus:ring-0 focus-visible:outline-none dark:text-white dark:placeholder:text-gray-300"
-        {...props}
-      />
+    <>
+      <div
+        className={cn(
+          "flex cursor-text flex-col rounded-[28px] border bg-white p-2 shadow-sm transition-colors dark:border-transparent dark:bg-[#303030]",
+          className
+        )}
+      >
+        <textarea
+          ref={internalTextareaRef}
+          rows={1}
+          value={value}
+          onChange={handleInputChange}
+          placeholder="Message..."
+          className="custom-scrollbar min-h-12 w-full resize-none border-0 bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus:ring-0 focus-visible:outline-none dark:text-white dark:placeholder:text-gray-300"
+          {...props}
+        />
 
-      <div className="mt-0.5 p-1 pt-0">
-        <TooltipProvider delayDuration={100}>
-          <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild></TooltipTrigger>
-            </Tooltip>
-
-            <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+        <div className="mt-0.5 p-1 pt-0">
+          <TooltipProvider delayDuration={100}>
+            <div className="flex items-center gap-2">
               <Tooltip>
-                <TooltipTrigger asChild>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className="flex h-8 items-center gap-2 rounded-full p-2 text-sm text-foreground transition-colors hover:bg-accent focus-visible:ring-ring focus-visible:outline-none dark:text-white dark:hover:bg-[#515151]"
-                    >
-                      <Settings2Icon className="h-4 w-4" />
-                      {!selectedTool && "Tools"}
-                    </button>
-                  </PopoverTrigger>
-                </TooltipTrigger>
-                <TooltipContent side="top" showArrow={true}>
-                  <p>Explore Tools</p>
-                </TooltipContent>
+                <TooltipTrigger asChild></TooltipTrigger>
               </Tooltip>
-              <PopoverContent side="top" align="start">
-                <div className="flex flex-col gap-1">
-                  {toolsList.map((tool) => (
-                    <button
-                      key={tool.id}
-                      onClick={() => {
-                        setSelectedTool(tool.id)
-                        setIsPopoverOpen(false)
-                      }}
-                      className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm hover:bg-accent dark:hover:bg-[#515151]"
-                    >
-                      <tool.icon className="h-4 w-4" /> <span>{tool.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
 
-            {activeTool && (
-              <>
-                <div className="h-4 w-px bg-border dark:bg-gray-600" />
-                <button
-                  onClick={() => setSelectedTool(null)}
-                  className="flex h-8 cursor-pointer flex-row items-center justify-center gap-2 rounded-full px-2 text-sm text-[#2294ff] transition-colors hover:bg-accent dark:text-[#99ceff] dark:hover:bg-[#3b4045]"
-                >
-                  {ActiveToolIcon && <ActiveToolIcon className="h-4 w-4" />}
-                  {activeTool.shortName}
-                  <XIcon className="h-4 w-4" />
-                </button>
-              </>
-            )}
+              <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="flex h-8 items-center gap-2 rounded-full p-2 text-sm text-foreground transition-colors hover:bg-accent focus-visible:ring-ring focus-visible:outline-none dark:text-white dark:hover:bg-[#515151]"
+                      >
+                        <Settings2Icon className="h-4 w-4" />
+                        {!selectedTool && "Tools"}
+                      </button>
+                    </PopoverTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" showArrow={true}>
+                    <p>Explore Tools</p>
+                  </TooltipContent>
+                </Tooltip>
+                <PopoverContent side="top" align="start">
+                  <div className="flex flex-col gap-1">
+                    {toolsList.map((tool) => (
+                      <button
+                        key={tool.id}
+                        onClick={() => {
+                          setSelectedTool(tool.id)
+                          setIsPopoverOpen(false)
+                        }}
+                        className="flex w-full items-center gap-2 rounded-md p-2 text-left text-sm hover:bg-accent dark:hover:bg-[#515151]"
+                      >
+                        <tool.icon className="h-4 w-4" />{" "}
+                        <span>{tool.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
 
-            {/* MODIFIED: Right-aligned buttons container */}
-            <div className="ml-auto flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
+              {activeTool && (
+                <>
+                  <div className="h-4 w-px bg-border dark:bg-gray-600" />
                   <button
-                    onClick={() => handleSubmit()}
-                    type="submit"
-                    disabled={!hasValue}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-black text-sm font-medium text-white transition-colors hover:bg-black/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:bg-black/40 dark:bg-white dark:text-black dark:hover:bg-white/80 dark:disabled:bg-[#515151]"
+                    onClick={() => setSelectedTool(null)}
+                    className="flex h-8 cursor-pointer flex-row items-center justify-center gap-2 rounded-full px-2 text-sm text-[#2294ff] transition-colors hover:bg-accent dark:text-[#99ceff] dark:hover:bg-[#3b4045]"
                   >
-                    <SendIcon className="text-bold h-6 w-6" />
-                    <span className="sr-only">Send message</span>
+                    {ActiveToolIcon && <ActiveToolIcon className="h-4 w-4" />}
+                    {activeTool.shortName}
+                    <XIcon className="h-4 w-4" />
                   </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" showArrow={true}>
-                  <p>Check the Sentiment</p>
-                </TooltipContent>
-              </Tooltip>
+                </>
+              )}
+
+              {/* MODIFIED: Right-aligned buttons container */}
+              <div className="ml-auto flex items-center gap-2">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => handleSubmit()}
+                      type="submit"
+                      disabled={!hasValue}
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-black text-sm font-medium text-white transition-colors hover:bg-black/80 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none disabled:pointer-events-none disabled:bg-black/40 dark:bg-white dark:text-black dark:hover:bg-white/80 dark:disabled:bg-[#515151]"
+                    >
+                      <SendIcon className="text-bold h-6 w-6" />
+                      <span className="sr-only">Send message</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" showArrow={true}>
+                    <p>Check the Sentiment</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
-          </div>
-        </TooltipProvider>
+          </TooltipProvider>
+        </div>
       </div>
       {isLoading && <Spinner className="mx-auto" />}
       {error && <div className="text-center text-sm text-red-500">{error}</div>}
-      {response && (
-        <div className="text-center text-sm text-foreground">{response}</div>
+      {response && !isLoading && !error && (
+        <div className="text-center text-sm text-foreground">
+          <Response type={getVariantForResponse(response)}>{response}</Response>
+        </div>
       )}
-    </div>
+    </>
   )
 })
 PromptBox.displayName = "PromptBox"
+
+type AlertVariant =
+  | "primary"
+  | "success"
+  | "destructive"
+  | "secondary"
+  | "info"
+  | "mono"
+  | "warning"
+
+const getVariantForResponse = (r: string | null | undefined): AlertVariant => {
+  if (!r) return "primary"
+  const val = r.toLowerCase()
+  if (val === "joy") return "secondary"
+  if (val === "anger") return "destructive"
+  if (val == "surprise") return "warning"
+  if (val == "fear") return "destructive"
+  if (val == "sadness") return "primary"
+  if (val == "love") return "success"
+  return "primary"
+}
+
+const Response = ({
+  children,
+  type,
+}: {
+  children: string
+  type?: AlertVariant
+}) => {
+  return (
+    <div className="mx-auto flex w-full max-w-150 flex-col items-center justify-center gap-5 px-10">
+      <Alert variant={type}>
+        The text represent
+        <AlertTitle className="font-bold tracking-widest uppercase">
+          {children}
+        </AlertTitle>
+      </Alert>
+    </div>
+  )
+}
