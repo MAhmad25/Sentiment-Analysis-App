@@ -16,7 +16,7 @@ export function App() {
       <div className="absolute flex w-full max-w-xl flex-col gap-10">
         <Shuffle
           className="text-xl dark:text-[#271814]"
-          style={{ FontFace: "Roboto" }}
+          style={{ fontFamily: "Roboto" }}
           text={"Check Sentiment"}
           onShuffleComplete={undefined}
           colorFrom={undefined}
