@@ -3,7 +3,7 @@ import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { SplitText as GSAPSplitText } from "gsap/SplitText"
 import { useGSAP } from "@gsap/react"
-import { JSX } from "react"
+import type { JSX } from "react"
 
 gsap.registerPlugin(ScrollTrigger, GSAPSplitText)
 
@@ -70,6 +70,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
 
   useEffect(() => {
     if ("fonts" in document) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (document.fonts.status === "loaded") setFontsLoaded(true)
       else document.fonts.ready.then(() => setFontsLoaded(true))
     } else setFontsLoaded(true)
@@ -125,7 +126,9 @@ const Shuffle: React.FC<ShuffleProps> = ({
         }
         try {
           splitRef.current?.revert()
-        } catch {}
+        } catch {
+          /* empty */
+        }
         splitRef.current = null
         playingRef.current = false
       }
@@ -254,6 +257,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
             inner.setAttribute("data-final-y", String(finalY))
           }
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           if (colorFrom) (inner.style as any).color = colorFrom
           wrappersRef.current.push(wrap)
         })
@@ -306,12 +310,12 @@ const Shuffle: React.FC<ShuffleProps> = ({
             if (scrambleCharset) randomizeScrambles()
             if (isVertical) {
               gsap.set(strips, {
-                y: (i, t: HTMLElement) =>
+                y: (_i, t: HTMLElement) =>
                   parseFloat(t.getAttribute("data-start-y") || "0"),
               })
             } else {
               gsap.set(strips, {
-                x: (i, t: HTMLElement) =>
+                x: (_i, t: HTMLElement) =>
                   parseFloat(t.getAttribute("data-start-x") || "0"),
               })
             }
@@ -329,6 +333,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
         })
 
         const addTween = (targets: HTMLElement[], at: number) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const vars: any = {
             duration,
             ease,
@@ -336,10 +341,10 @@ const Shuffle: React.FC<ShuffleProps> = ({
             stagger: animationMode === "evenodd" ? stagger : 0,
           }
           if (isVertical) {
-            vars.y = (i: number, t: HTMLElement) =>
+            vars.y = (_i: number, t: HTMLElement) =>
               parseFloat(t.getAttribute("data-final-y") || "0")
           } else {
-            vars.x = (i: number, t: HTMLElement) =>
+            vars.x = (_i: number, t: HTMLElement) =>
               parseFloat(t.getAttribute("data-final-x") || "0")
           }
 
@@ -359,6 +364,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
         } else {
           strips.forEach((strip) => {
             const d = Math.random() * maxDelay
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const vars: any = {
               duration,
               ease,
@@ -473,6 +479,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
 
   return React.createElement(
     Tag,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     { ref: ref as any, className: classes, style: commonStyle },
     text
   )
