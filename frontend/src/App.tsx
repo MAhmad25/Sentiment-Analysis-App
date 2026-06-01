@@ -16,6 +16,7 @@ export function App() {
       <div className="absolute flex w-full max-w-xl flex-col gap-10">
         <Shuffle
           text="Check Sentiment"
+          className="text-[#1a1a1a]"
           shuffleDirection="right"
           duration={1}
           animationMode="evenodd"
