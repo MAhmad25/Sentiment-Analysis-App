@@ -40,6 +40,8 @@
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
     --destructive-foreground: oklch(0.205 0 0);
+    --accents-1: #fafafa;
+    --accents-2: #eaeaea;
 }
 
 .dark {
@@ -75,6 +77,8 @@
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
     --destructive-foreground: oklch(0.985 0 0);
+    --accents-2: #333333;
+    --accents-1: #111111;
 }
 
 @theme inline {
@@ -120,6 +124,17 @@
     --radius-4xl: calc(var(--radius) * 2.6);
     --radius: var(----radius);
     --color-destructive-foreground: var(--destructive-foreground);
+    --animate-skeleton-loading: skeletonLoading 8s infinite ease-in-out;
+    --color-accents-2: var(----accents-2);
+    --color-accents-1: var(----accents-1);
+  @keyframes skeletonLoading {
+  0% {
+    backgroundPosition: 200% 0;
+        }
+  100% {
+    backgroundPosition: -200% 0;
+        }
+    }
 }
 
 @layer base {

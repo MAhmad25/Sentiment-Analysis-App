@@ -3,8 +3,8 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 import * as PopoverPrimitive from "@radix-ui/react-popover"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import api from "../api/base"
-import { Spinner } from "./ui/spinner"
 import { Alert, AlertTitle } from "../components/alert"
+import { GooeyLoader } from "./ui/loader-10"
 
 type ClassValue = string | number | boolean | null | undefined
 function cn(...inputs: ClassValue[]): string {
@@ -229,8 +229,10 @@ export const PromptBox = React.forwardRef<
     try {
       const response = await api.post("/predict", { text: value })
       setResponse(response.data.Label)
-    } catch (error) {
-      setError(error as string)
+      console.log(response)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setError(err?.message ?? String(err))
     } finally {
       setIsLoading(false)
     }
@@ -271,7 +273,7 @@ export const PromptBox = React.forwardRef<
           rows={1}
           value={value}
           onChange={handleInputChange}
-          placeholder="Message..."
+          placeholder="Your text..."
           className="custom-scrollbar min-h-12 w-full resize-none border-0 bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus:ring-0 focus-visible:outline-none dark:text-white dark:placeholder:text-gray-300"
           {...props}
         />
@@ -333,7 +335,6 @@ export const PromptBox = React.forwardRef<
                 </>
               )}
 
-              {/* MODIFIED: Right-aligned buttons container */}
               <div className="ml-auto flex items-center gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -356,7 +357,13 @@ export const PromptBox = React.forwardRef<
           </TooltipProvider>
         </div>
       </div>
-      {isLoading && <Spinner className="mx-auto text-black" />}
+      {isLoading && (
+        <GooeyLoader
+          primaryColor="#1a1a1a" // red-400
+          secondaryColor="#1a1a1a" // red-300
+          borderColor="#e5e7eb" // gray-200
+        />
+      )}
       {error && <div className="text-center text-sm text-red-500">{error}</div>}
       {response && !isLoading && !error && (
         <div className="text-center text-sm text-foreground">
@@ -399,7 +406,7 @@ const Response = ({
   return (
     <div className="mx-auto flex w-full max-w-150 flex-col items-center justify-center gap-5 px-10">
       <Alert variant={type}>
-        The text represent
+        This text represent
         <AlertTitle className="font-bold tracking-widest uppercase">
           {children}
         </AlertTitle>
