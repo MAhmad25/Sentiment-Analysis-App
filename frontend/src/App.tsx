@@ -21,6 +21,7 @@ export function App() {
         />
         <Shuffle
           text="Check Sentiment"
+          className="text-[#1a1a1a]"
           shuffleDirection="right"
           duration={1}
           animationMode="evenodd"
