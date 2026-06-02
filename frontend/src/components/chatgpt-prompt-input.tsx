@@ -264,7 +264,7 @@ export const PromptBox = React.forwardRef<
     <>
       <div
         className={cn(
-          "flex cursor-text flex-col rounded-[28px] border bg-white p-2 shadow-sm transition-colors dark:border-transparent dark:bg-[#303030]",
+          "mx-5 flex cursor-text flex-col rounded-[28px] border bg-white p-2 shadow-sm transition-colors md:mx-0 dark:border-transparent dark:bg-[#303030]",
           className
         )}
       >
@@ -359,9 +359,9 @@ export const PromptBox = React.forwardRef<
       </div>
       {isLoading && (
         <GooeyLoader
-          primaryColor="#1a1a1a" // red-400
-          secondaryColor="#1a1a1a" // red-300
-          borderColor="#e5e7eb" // gray-200
+          primaryColor="#1a1a1a"
+          secondaryColor="#1a1a1a"
+          borderColor="#e5e7eb"
         />
       )}
       {error && <div className="text-center text-sm text-red-500">{error}</div>}
