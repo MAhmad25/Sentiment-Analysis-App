@@ -1,3 +1,5 @@
+<img src="https://i.ibb.co/N27JpMw0/512-1x-shots-so.png" alt="512 1x shots so" border="0">
+
 # Sentiment Analysis App
 
 A full-stack sentiment analysis application that classifies user-provided text through a FastAPI backend and a React frontend. The backend loads trained machine learning artifacts, preprocesses the input text, predicts the sentiment class, and returns the result to the frontend for display.
