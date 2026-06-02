@@ -356,7 +356,7 @@ export const PromptBox = React.forwardRef<
           </TooltipProvider>
         </div>
       </div>
-      {isLoading && <Spinner className="mx-auto" />}
+      {isLoading && <Spinner className="mx-auto text-black" />}
       {error && <div className="text-center text-sm text-red-500">{error}</div>}
       {response && !isLoading && !error && (
         <div className="text-center text-sm text-foreground">

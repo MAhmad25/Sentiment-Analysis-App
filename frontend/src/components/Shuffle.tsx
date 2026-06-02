@@ -451,7 +451,7 @@ const Shuffle: React.FC<ShuffleProps> = ({
   )
 
   const baseTw =
-    "inline-block whitespace-normal break-words will-change-transform uppercase text-2xl leading-none"
+    "inline-block whitespace-normal break-words will-change-transform uppercase text-2xl  leading-none"
   const userHasFont = useMemo(
     () => className && /font[-[]/i.test(className),
     [className]

@@ -14,6 +14,11 @@ export function App() {
         }}
       />
       <div className="absolute flex w-full max-w-xl flex-col gap-10">
+        <img
+          className="mx-auto h-10 w-10 object-cover"
+          src="./logo.svg"
+          alt="logo"
+        />
         <Shuffle
           text="Check Sentiment"
           shuffleDirection="right"
